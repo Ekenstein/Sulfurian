@@ -13,11 +13,26 @@ plugins {
 group = "com.github.ekenstein"
 version = "1.0-SNAPSHOT"
 
+val ktorVersion: String by project
+val exposedVersion: String by project
+val kotlinJvmTarget: String by project
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
+    implementation("io.ktor", "ktor-server-auth", ktorVersion)
+    implementation("io.ktor", "ktor-server-core", ktorVersion)
+    implementation("io.ktor", "ktor-server-netty", ktorVersion)
+
+    implementation("org.jetbrains.exposed", "exposed-core", exposedVersion)
+    implementation("org.jetbrains.exposed", "exposed-jdbc", exposedVersion)
+    implementation("org.xerial", "sqlite-jdbc", "3.45.1.0")
+
+
+    implementation("org.jetbrains.kotlinx", "kotlinx-cli", "0.3.6")
+
     testImplementation(kotlin("test"))
 }
 
@@ -38,7 +53,24 @@ tasks {
     }
 
     compileKotlin {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions {
+            jvmTarget = kotlinJvmTarget
+            freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
+        }
+    }
+
+    compileTestKotlin {
+        kotlinOptions {
+            jvmTarget = kotlinJvmTarget
+            freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
+        }
+    }
+
+    listOf(compileJava, compileTestJava).map { task ->
+        task {
+            sourceCompatibility = kotlinJvmTarget
+            targetCompatibility = kotlinJvmTarget
+        }
     }
 }
 
